@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """RuTracker search engine plugin for qBittorrent."""
-#VERSION: 2.19
-#AUTHORS: nbusseneau (https://github.com/nbusseneau/qBittorrent-RuTracker-plugin)
+#VERSION: 
+#AUTHORS: nbusseneau (https://github.com/nbusseneau/qBittorrent-RuTracker-plugin), Bubbu0129 (https://github.com/Bubbu0129/qBittorrent-RuTracker-plugin)
 
 class Config(object):
     # Replace `YOUR_USERNAME_HERE` and `YOUR_PASSWORD_HERE` with your RuTracker username and password
@@ -10,7 +10,7 @@ class Config(object):
     password = u'YOUR_PASSWORD_HERE'
 
     # If you want to use magnet links instead of torrent files for downloading, uncomment `download_type`
-    # download_type = 'MAGNET_LINK'
+    #download_type = 'MAGNET_LINK'
 
     # Configurable list of RuTracker mirrors
     # Default: official RuTracker URLs
@@ -26,6 +26,13 @@ class Config(object):
     api_mirrors = [
         'https://api.t-ru.org/v1/',
     ]
+
+    # Optional HTTP proxy
+    # Uncomment `http_proxy` and replace `[HTTP_PROXY_HOSTNAME]` and `[HTTP_PROXY_PORT]` with respective HTTP proxy hostname and port
+    #http_proxy = "http://[HTTP_PROXY_HOSTNAME]:[HTTP_PROXY_PORT]"
+    # Optional HTTP proxy authentication
+    # Uncomment `http_proxy_auth` and replace `HTTP_PROXY_USERNAME` and `HTTP_PROXY_PASSWORD` with respective HTTP proxy username and password
+    #http_proxy_auth = ("HTTP_PROXY_USERNAME", "HTTP_PROXY_PASSWORD")
 
 CONFIG = Config()
 DEFAULT_ENGINE_URL = CONFIG.mirrors[0]
@@ -49,7 +56,7 @@ import tempfile
 from typing import Optional
 from urllib.error import URLError, HTTPError
 from urllib.parse import unquote, urlencode
-from urllib.request import build_opener, HTTPCookieProcessor
+from urllib.request import build_opener, HTTPCookieProcessor, ProxyHandler, HTTPPasswordMgrWithDefaultRealm
 
 try:
     import novaprinter
@@ -112,7 +119,13 @@ class RuTrackerBase(object):
     def __init__(self):
         """[Called by qBittorrent from `nova2.py` and `nova2dl.py`] Initialize RuTracker search engine, signing in using given credentials."""
         self.cj = cookielib.CookieJar()
-        self.opener = build_opener(HTTPCookieProcessor(self.cj))
+        proxy_handler = ProxyHandler()
+        password_mgr = HTTPPasswordMgrWithDefaultRealm()
+        if hasattr(CONFIG, 'http_proxy'):
+            proxy_handler = ProxyHandler({"http": CONFIG.http_proxy, "https": CONFIG.http_proxy})
+            if hasattr(CONFIG, 'http_proxy_auth'):
+                password_mgr.add_password(None, http_proxy, *CONFIG.http_proxy_auth)
+        self.opener = build_opener(HTTPCookieProcessor(self.cj), proxy_handler, password_mgr)
         self.opener.addheaders = [
             ('User-Agent', ''),
             ('Accept-Encoding', 'gzip, deflate'),

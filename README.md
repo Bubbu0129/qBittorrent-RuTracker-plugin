@@ -1,4 +1,6 @@
-# qBittorrent RuTracker plugin
+# This is a fork of qBittorrent RuTracker plugin Version 2.1.9, adding support for HTTP proxy. For non proxy related issues, please visit the upstream repository [nbusseneau/qBittorrent-RuTracker-plugin](https://github.com/nbusseneau/qBittorrent-RuTracker-plugin).
+
+## qBittorrent RuTracker plugin
 
 qBittorrent search engine plugin for RuTracker.
 The plugin conforms to [qBittorrent's search plugin API/specifications](https://github.com/qbittorrent/search-plugins/wiki/How-to-write-a-search-plugin).
